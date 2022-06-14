@@ -1,0 +1,77 @@
+use hospital;
+/*view 1: request a list of patients and their info*/
+CREATE VIEW PatientLog AS
+SELECT name, patient_id, phone_num
+FROM Patient;
+
+SELECT * FROM PatientLog;
+
+/*view 2: views the expertise of a physician with their id as well*/
+CREATE VIEW Physician_Expertise AS
+SELECT field_of_expertise, physician_id
+FROM Physician;
+
+SELECT * FROM Physician;
+
+/*view 3 shows the num of nights a speciic patient has been hospitalized for*/
+CREATE VIEW PatientDuration AS
+SELECT room_num, patient_id, num_of_nights
+FROM Hospitalization;
+
+SELECT * FROM Hospitalization;
+/*Find the name of patients hospitalized for more than 5 nights*/
+SELECT name
+FROM patient LEFT JOIN Hospitalization ON patient.patient_id= hospitalization.patient_id
+WHERE num_of_nights < 5 ;
+
+/*patient that have been persribed medication by nurse with id 2442 */
+SELECT patient.patient_id from medication, nurse, patient
+WHERE medication.nurse_id = nurse.nurse_id  and
+patient.patient_id = medication.patient_id
+and nurse.nurse_id = '2442';
+
+/*patient name of payment amount being more than $800*/
+SELECT name, sum(amount)
+FROM patient INNER JOIN payment
+ON patient.patient_id = payment.patient_id
+GROUP BY name
+HAVING amount > 800;
+
+/* List the full name, staff type and staff number of the physician whose field
+of expertise is cariology */
+SELECT name, staff.staff_type, physician.staff_num
+FROM Staff
+INNER JOIN Physician 
+ON physician.staff_num = staff.staff_num
+WHERE field_of_expertise = 'Cariology'
+	AND field_of_expertise =
+    (SELECT field_of_expertise
+    FROM physician
+    WHERE field_of_expertise ='Cariology');
+
+
+
+/*returnss name address and staff type of the staff whose id is 2324 and has
+given instructions to any patient*/
+SELECT name, address, staff_type
+FROM staff s
+WHERE p.physician_id IN(
+SELECT p.staff_num
+FROM physician p, instructions i
+WHERE p.physician_id = i.physician_id
+AND p.physician_id = '2324');
+
+/* show the name and room number of the patient who has been hospitalized for over a week*/
+SELECT p.name, h.room_num
+FROM patient p, hospitalization h
+WHERE p.patient_id = h.patient_id
+AND h.num_of_nights < '7';
+
+/*return the total amount patients spent being hospitalize between february and march in 2022*/
+SELECT SUM(amount)
+FROM payment p 
+INNER JOIN patient pa
+ON p.patient_id = pa.patient_id
+WHERE MONTH(date) BETWEEN 2 and  3 AND YEAR(date) = 2022;
+
+
